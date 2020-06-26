@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { CATEGORIES } from './data'
+import TaskList from './components/TaskList'
 
 class App extends React.Component {
 
@@ -35,35 +35,9 @@ class App extends React.Component {
         category: 'Misc'
       }
     ],
+    text: "",
+    select: "Code",
     category: ""
-  }
-
-  renderTasks = (tasks) => {
-    if (this.state.category === "Code") { 
-      const arrayOfTasks = this.state.tasks.filter(task => { return task.category === "Code" })
-      
-      return arrayOfTasks.map(task => { return <li key={`${task.text}-${task.category}`}>{task.category}: {task.text}</li> }) 
-    }
-    
-    if (this.state.category === "Food") { 
-      const arrayOfTasks = this.state.tasks.filter(task => { return task.category === "Food" })
-      
-      return arrayOfTasks.map(task => { return <li key={`${task.text}-${task.category}`}>{task.category}: {task.text}</li> }) 
-    }
-    
-    if (this.state.category === "Money") { 
-      const arrayOfTasks = this.state.tasks.filter(task => { return task.category === "Money" })
-      
-      return arrayOfTasks.map(task => { return <li key={`${task.text}-${task.category}`}>{task.category}: {task.text}</li> }) 
-    }
-    
-    if (this.state.category === "Misc") { 
-      const arrayOfTasks = this.state.tasks.filter(task => { return task.category === "Misc" })
-      
-      return arrayOfTasks.map(task => { return <li key={`${task.text}-${task.category}`}>{task.category}: {task.text}</li> }) 
-     }
-    
-    else { return tasks.map(task => { return <li key={`${task.text}-${task.category}`}>{task.category}: {task.text} <button onClick={this.handleDelete}>x</button></li> }) }
   }
 
   handleClick = (evt) => {
@@ -73,27 +47,50 @@ class App extends React.Component {
   }
 
   handleDelete = (evt) => {
-    const task = evt.target.parentNode.innerText
+    const taskToDelete = evt.target.parentNode.innerText
     
     this.setState((prevState) => {
-
-      //Why can't I do evt.target from inside the handleDelete? 
-
       return {
-        tasks: prevState.tasks.filter(task => (`${task.category}: ${task.text} x` !== task))
+        tasks: prevState.tasks.filter((task) => (`${task.category}: ${task.text} x` !== taskToDelete))
       }
     })
+  }
+
+  handleChange = (evt) => {
+    this.setState({
+      [evt.target.name]: evt.target.value
+    })
+  }
+
+  handleSubmit = (evt) => {
+    evt.preventDefault()
+
+    const newTask = {
+      text: this.state.text,
+      category: this.state.select
+    }
+
+    this.setState((prevState) => {
+      return {
+      tasks: [...prevState.tasks, newTask]
+    }})
   }
 
   render() {
     return (
       <div className="App">
         <h2>My tasks</h2>
-        <p>Category Filters</p>
-        {CATEGORIES.map(category => (<button key={category} onClick={this.handleClick}>{category}</button>))}
-        <ul>
-          {this.renderTasks(this.state.tasks)}
-        </ul>
+        <form onSubmit={this.handleSubmit}>
+          <input name="text" value={this.state.text} onChange={this.handleChange}></input>
+          <select name="select" value={this.state.select} onChange={this.handleChange}>
+            <option>Code</option>
+            <option>Food</option>
+            <option>Money</option>
+            <option>Misc</option>
+          </select>
+          <input type="submit" />
+        </form>
+        <TaskList tasks={this.state.tasks} category={this.state.category} handleClick={this.handleClick} handleDelete={this.handleDelete} />
       </div>
     );
   }
